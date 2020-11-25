@@ -26,6 +26,8 @@ package com.segment.analytics.sample;
 import android.app.Application;
 import android.util.Log;
 import com.segment.analytics.Analytics;
+import com.segment.analytics.ConnectionFactory;
+import com.segment.analytics.Crypto;
 import com.segment.analytics.Middleware;
 import com.segment.analytics.ValueMap;
 import com.segment.analytics.integrations.BasePayload;
@@ -37,7 +39,7 @@ import io.github.inflationx.viewpump.ViewPump;
 public class SampleApp extends Application {
 
     // https://segment.com/segment-engineering/sources/android-test/settings/keys
-    private static final String ANALYTICS_WRITE_KEY = "HO63Z36e0Ufa8AAgbjDomDuKxFuUICqI";
+    private static final String ANALYTICS_WRITE_KEY = "ZnJ1dWdvOmZydXVnbzpGUlVVR08=";
 
     @Override
     public void onCreate() {
@@ -58,6 +60,7 @@ public class SampleApp extends Application {
                 new Analytics.Builder(this, ANALYTICS_WRITE_KEY)
                         .experimentalNanosecondTimestamps()
                         .trackApplicationLifecycleEvents()
+                        .trackDeepLinks()
                         .defaultProjectSettings(
                                 new ValueMap()
                                         .putValue(
@@ -70,38 +73,8 @@ public class SampleApp extends Application {
                                                                         .putValue(
                                                                                 "trackAttributionData",
                                                                                 true))))
-                        .useSourceMiddleware(
-                                new Middleware() {
-                                    @Override
-                                    public void intercept(Chain chain) {
-                                        if (chain.payload().type() == BasePayload.Type.track) {
-                                            TrackPayload payload = (TrackPayload) chain.payload();
-                                            if (payload.event()
-                                                    .equalsIgnoreCase("Button B Clicked")) {
-                                                chain.proceed(payload.toBuilder().build());
-                                                return;
-                                            }
-                                        }
-                                        chain.proceed(chain.payload());
-                                    }
-                                })
-                        .useDestinationMiddleware(
-                                "Segment.io",
-                                new Middleware() {
-                                    @Override
-                                    public void intercept(Chain chain) {
-                                        if (chain.payload().type() == BasePayload.Type.track) {
-                                            TrackPayload payload = (TrackPayload) chain.payload();
-                                            if (payload.event()
-                                                    .equalsIgnoreCase("Button B Clicked")) {
-                                                chain.proceed(payload.toBuilder().build());
-                                                return;
-                                            }
-                                        }
-                                        chain.proceed(chain.payload());
-                                    }
-                                })
-                        .flushQueueSize(1)
+
+                        .flushQueueSize(10)
                         .recordScreenViews();
 
         // Set the initialized instance as a globally accessible instance.
@@ -114,11 +87,6 @@ public class SampleApp extends Application {
         // listener.
         analytics.onIntegrationReady(
                 "Segment.io",
-                new Analytics.Callback() {
-                    @Override
-                    public void onReady(Object instance) {
-                        Log.d("Segment Sample", "Segment integration ready.");
-                    }
-                });
+                (Analytics.Callback) instance -> Log.d("Segment Sample", "Segment integration ready."));
     }
 }

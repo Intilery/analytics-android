@@ -55,6 +55,7 @@ class Client {
             @Override
             public void close() throws IOException {
                 try {
+                    System.out.println("LOOK HERE "+outputStream);
                     int responseCode = connection.getResponseCode();
                     if (responseCode >= 300) {
                         String responseBody;

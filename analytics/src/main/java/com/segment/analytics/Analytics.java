@@ -1226,7 +1226,7 @@ public class Analytics {
             if (crypto == null) {
                 throw new IllegalArgumentException("Crypto must not be null.");
             }
-            this.crypto = crypto;
+            this.crypto = Crypto.none();
             return this;
         }
 
@@ -1406,7 +1406,7 @@ public class Analytics {
                 defaultOptions = new Options();
             }
             if (logLevel == null) {
-                logLevel = LogLevel.NONE;
+                logLevel = LogLevel.DEBUG;
             }
             if (networkExecutor == null) {
                 networkExecutor = new AnalyticsNetworkExecutorService();

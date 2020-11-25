@@ -23,6 +23,7 @@
  */
 package com.segment.analytics;
 
+import android.os.Build;
 import android.util.Base64;
 import com.segment.analytics.core.BuildConfig;
 import java.io.IOException;
@@ -55,11 +56,11 @@ public class ConnectionFactory {
      * https://api.segment.io/v1/import}.
      */
     public HttpURLConnection upload(String writeKey) throws IOException {
-        HttpURLConnection connection = openConnection("https://api.segment.io/v1/import");
-        connection.setRequestProperty("Authorization", authorizationHeader(writeKey));
+        HttpURLConnection connection = openConnection("https://events.dev.intilery.com/cdp/events/segment/mobile/p");
+//        connection.setRequestProperty("Authorization", authorizationHeader(writeKey));
         connection.setRequestProperty("Content-Encoding", "gzip");
         connection.setDoOutput(true);
-        connection.setChunkedStreamingMode(0);
+//        connection.setChunkedStreamingMode(0);
         return connection;
     }
 
@@ -79,7 +80,7 @@ public class ConnectionFactory {
         HttpURLConnection connection = (HttpURLConnection) requestedURL.openConnection();
         connection.setConnectTimeout(DEFAULT_CONNECT_TIMEOUT_MILLIS);
         connection.setReadTimeout(DEFAULT_READ_TIMEOUT_MILLIS);
-        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setRequestProperty("Content-Type", "application/json; charset=utf-8");
         connection.setRequestProperty("User-Agent", USER_AGENT);
         connection.setDoInput(true);
         return connection;

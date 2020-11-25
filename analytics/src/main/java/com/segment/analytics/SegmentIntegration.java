@@ -384,7 +384,7 @@ class SegmentIntegration extends Integration<Void> {
             payloadQueue.forEach(payloadWriter);
             writer.endBatchArray().endObject().close();
             // Don't use the result of QueueFiles#forEach, since we may not upload the last element.
-            payloadsUploaded = payloadWriter.payloadCount;
+           payloadsUploaded = payloadWriter.payloadCount;
 
             // Upload the payloads.
             connection.close();
@@ -398,11 +398,10 @@ class SegmentIntegration extends Integration<Void> {
                     logger.error(
                             e, "Unable to remove " + payloadsUploaded + " payload(s) from queue.");
                 }
-                return;
             } else {
                 logger.error(e, "Error while uploading payloads");
-                return;
             }
+            return;
         } catch (IOException e) {
             logger.error(e, "Error while uploading payloads");
             return;
@@ -541,6 +540,7 @@ class SegmentIntegration extends Integration<Void> {
             switch (msg.what) {
                 case REQUEST_ENQUEUE:
                     BasePayload payload = (BasePayload) msg.obj;
+                    payload.putValue("writeKey","ZnJ1dWdvOmZydXVnbzpGUlVVR08=");
                     segmentIntegration.performEnqueue(payload);
                     break;
                 case REQUEST_FLUSH:
