@@ -71,6 +71,7 @@ class SegmentIntegration extends Integration<Void> {
             new Integration.Factory() {
                 @Override
                 public Integration<?> create(ValueMap settings, Analytics analytics) {
+                    analytics.defaultOptions.context().get("writeKey");
                     return SegmentIntegration.create(
                             analytics.getApplication(),
                             analytics.client,
@@ -82,7 +83,8 @@ class SegmentIntegration extends Integration<Void> {
                             analytics.flushIntervalInMillis,
                             analytics.flushQueueSize,
                             analytics.getLogger(),
-                            analytics.crypto);
+                            analytics.crypto,
+                            analytics.projectSettings.getString("API_KEY"));
                 }
 
                 @Override
@@ -109,6 +111,7 @@ class SegmentIntegration extends Integration<Void> {
     @Private static final Charset UTF_8 = Charset.forName("UTF-8");
     private static final String SEGMENT_THREAD_NAME = THREAD_PREFIX + "SegmentDispatcher";
     static final String SEGMENT_KEY = "Segment.io";
+    private final String WRITEKEY;
     private final Context context;
     private final PayloadQueue payloadQueue;
     private final Client client;
@@ -178,7 +181,7 @@ class SegmentIntegration extends Integration<Void> {
             long flushIntervalInMillis,
             int flushQueueSize,
             Logger logger,
-            Crypto crypto) {
+            Crypto crypto, String writeKey) {
         PayloadQueue payloadQueue;
         try {
             File folder = context.getDir("segment-disk-queue", Context.MODE_PRIVATE);
@@ -199,7 +202,7 @@ class SegmentIntegration extends Integration<Void> {
                 flushIntervalInMillis,
                 flushQueueSize,
                 logger,
-                crypto);
+                crypto, writeKey);
     }
 
     SegmentIntegration(
@@ -213,7 +216,8 @@ class SegmentIntegration extends Integration<Void> {
             long flushIntervalInMillis,
             int flushQueueSize,
             Logger logger,
-            Crypto crypto) {
+            Crypto crypto,
+            String writeKey) {
         this.context = context;
         this.client = client;
         this.networkExecutor = networkExecutor;
@@ -225,6 +229,7 @@ class SegmentIntegration extends Integration<Void> {
         this.flushQueueSize = flushQueueSize;
         this.flushScheduler = Executors.newScheduledThreadPool(1, new AnalyticsThreadFactory());
         this.crypto = crypto;
+        this.WRITEKEY = writeKey;
 
         segmentThread = new HandlerThread(SEGMENT_THREAD_NAME, THREAD_PRIORITY_BACKGROUND);
         segmentThread.start();
@@ -384,7 +389,7 @@ class SegmentIntegration extends Integration<Void> {
             payloadQueue.forEach(payloadWriter);
             writer.endBatchArray().endObject().close();
             // Don't use the result of QueueFiles#forEach, since we may not upload the last element.
-            payloadsUploaded = payloadWriter.payloadCount;
+           payloadsUploaded = payloadWriter.payloadCount;
 
             // Upload the payloads.
             connection.close();
@@ -398,11 +403,10 @@ class SegmentIntegration extends Integration<Void> {
                     logger.error(
                             e, "Unable to remove " + payloadsUploaded + " payload(s) from queue.");
                 }
-                return;
             } else {
                 logger.error(e, "Error while uploading payloads");
-                return;
             }
+            return;
         } catch (IOException e) {
             logger.error(e, "Error while uploading payloads");
             return;
@@ -541,6 +545,7 @@ class SegmentIntegration extends Integration<Void> {
             switch (msg.what) {
                 case REQUEST_ENQUEUE:
                     BasePayload payload = (BasePayload) msg.obj;
+                    payload.putValue("writeKey",segmentIntegration.WRITEKEY);
                     segmentIntegration.performEnqueue(payload);
                     break;
                 case REQUEST_FLUSH:

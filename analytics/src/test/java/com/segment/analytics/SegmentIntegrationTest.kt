@@ -650,7 +650,8 @@ class SegmentIntegrationTest {
                 flushInterval.toLong(),
                 flushSize,
                 logger,
-                Crypto.none()
+                Crypto.none(),
+                    "API_KEY"
             )
         }
     }

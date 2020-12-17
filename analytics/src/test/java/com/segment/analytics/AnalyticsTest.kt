@@ -2071,8 +2071,10 @@ open class AnalyticsTest {
             true
         )
 
-        assertThat(analytics.projectSettings).hasSize(2)
+        assertThat(analytics.projectSettings).hasSize(3)
         assertThat(analytics.projectSettings).containsKey("integrations")
+        assertThat(analytics.projectSettings).containsKey("API_KEY")
+        assertThat(analytics.projectSettings).containsEntry("API_KEY", "foo");
         assertThat(analytics.projectSettings.integrations()).hasSize(2)
         assertThat(analytics.projectSettings.integrations()).containsKey("Segment.io")
         assertThat(analytics.projectSettings.integrations()).containsKey("Adjust")
@@ -2116,8 +2118,9 @@ open class AnalyticsTest {
             true
         )
 
-        assertThat(analytics.projectSettings).hasSize(2)
+        assertThat(analytics.projectSettings).hasSize(3)
         assertThat(analytics.projectSettings).containsKey("integrations")
+        assertThat(analytics.projectSettings).containsKey("API_KEY")
         assertThat(analytics.projectSettings.integrations()).hasSize(1)
         assertThat(analytics.projectSettings.integrations()).containsKey("Segment.io")
     }
@@ -2170,8 +2173,10 @@ open class AnalyticsTest {
             true
         )
 
-        assertThat(analytics.projectSettings).hasSize(2)
+        assertThat(analytics.projectSettings).hasSize(3)
         assertThat(analytics.projectSettings).containsKey("integrations")
+        assertThat(analytics.projectSettings).containsKey("API_KEY")
+        assertThat(analytics.projectSettings).containsEntry("API_KEY", "foo")
         assertThat(analytics.projectSettings.integrations()).containsKey("Segment.io")
         assertThat(analytics.projectSettings.integrations()).hasSize(1)
         assertThat(analytics.projectSettings.integrations().getValueMap("Segment.io"))
